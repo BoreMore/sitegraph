@@ -6,24 +6,30 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
+/**
+ * Class that handles url scraping and updating the Graph.
+ */
 public class SiteScraper {
-	private String mainURL;
-	private int depth;
-	private Graph siteGraph;
+
+	private static Graph siteGraph;
 	
-	public SiteScraper(String webURL, int linkDepth) {
-		mainURL = webURL;
-		depth = linkDepth;
+	/**
+	 * Constructs a new SiteScraper object and initializes Graph object.
+	 */
+	public SiteScraper() {
 		siteGraph = new Graph();
 	}
-
-	public String getURL() {
-		return mainURL;
-	}
 	
-	public Elements scrapeLinks(Elements links) throws IOException {
+	/**
+	 * Recursively scrapes page and its links for a specified depth.
+	 * @param links the links to scrape
+	 * @param depth how many layers of links to scrape
+	 * @param getAllTitles specifies whether to get titles for the last set of links (setting this to true makes the sitegraph neater and easier to read but may greatly increase the time needed to scrape)
+	 * @return the next links to scrape
+	 * @throws IOException if there is an error in connecting to the url
+	 */
+	private static Elements scrapeLinks(Elements links, int depth, boolean getAllTitles) throws IOException {
 		Elements newLinks = new Elements();
 		
 		if (depth > 0 && links.size() > 0) {
@@ -55,52 +61,53 @@ public class SiteScraper {
 			
 			depth--;
 			
-			return scrapeLinks(newLinks);
+			return scrapeLinks(newLinks, depth, getAllTitles);
 		} else {
-			// uncomment to get titles of last links in depth
-			/*for (Element link : links) {
-				try {
-					String hrefAttr = link.attr("abs:href");
-					if (link.attr("abs:href") != null && link.attr("abs:href").length() > 0) {
-						
-						Document doc = Jsoup.connect(link.attr("abs:href")).get();
-						
-						Node newNode = new Node(hrefAttr, doc.title());
-						siteGraph.addNode(newNode);
-						
+			if (getAllTitles) {
+				for (Element link : links) {
+					try {
+						String hrefAttr = link.attr("abs:href");
+						if (link.attr("abs:href") != null && link.attr("abs:href").length() > 0) {
+							
+							Document doc = Jsoup.connect(link.attr("abs:href")).get();
+							
+							Node newNode = new Node(hrefAttr, doc.title());
+							siteGraph.addNode(newNode);
+							
+						}
+					} catch (Exception e) {
+					    
 					}
-				} catch (Exception e) {
-				    
 				}
-			}*/
+			}
+				
 			return links;
 		}
 		
 	}
 	
-	public void gatewayLink() throws IOException {
+	/**
+	 * Converts String url to an Element and calls scrapeLinks.
+	 * @param url the url to scrape
+	 * @param depth how many layers of links to scrape
+	 * @param getAllTitles specifies whether to get titles for the last set of links (setting this to true makes the sitegraph neater and easier to read but may greatly increase the time needed to scrape)
+	 * @throws IOException if there is an error in connecting to the url
+	 */
+	public void gatewayLink(String url, int depth, boolean getAllTitles) throws IOException {
 		
 		Element el = new Element("a");
-		el.attr("href", mainURL);
+		el.attr("href", url);
 		Elements mainLink = new Elements();
 		mainLink.add(el);
 		
-		scrapeLinks(mainLink);
+		scrapeLinks(mainLink, depth, getAllTitles);
 
 	}
 	
-	public Graph getGraph() {
-		return siteGraph;
-	}
-	
-	public ArrayList<Edges> getGraphEdges() {
-		return siteGraph.getEdges();
-	}
-	
-	public ArrayList<Node> getGraphNodes() {
-		return siteGraph.getNodes();
-	}
-	
+	/**
+	 * Calls method in Graph class to construct a DOT file.
+	 * @return the file location if successful or error message if unsuccessful
+	 */
 	public String constructDOT() {
 		return siteGraph.constructDOT();
 	}
