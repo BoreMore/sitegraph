@@ -1,7 +1,6 @@
 package sitegraph;
 
 import org.jsoup.Jsoup;
-//import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -58,6 +57,7 @@ public class SiteScraper {
 			
 			return scrapeLinks(newLinks);
 		} else {
+			// uncomment to get titles of last links in depth
 			/*for (Element link : links) {
 				try {
 					String hrefAttr = link.attr("abs:href");
@@ -86,10 +86,7 @@ public class SiteScraper {
 		mainLink.add(el);
 		
 		scrapeLinks(mainLink);
-		
-		//System.out.println(allLinks);
-        
-        //return "";
+
 	}
 	
 	public Graph getGraph() {
