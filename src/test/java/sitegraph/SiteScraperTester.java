@@ -8,7 +8,7 @@ public class SiteScraperTester {
 		
 		// update idea:
 		// pass in percentage of links to visit if depth is greater than 1
-		SiteScraper myScraper = new SiteScraper("http://www.cobbk12.org/wheeler/", 1);
+		SiteScraper myScraper = new SiteScraper("https://www.genius.com/", 1);
 		
 		myScraper.gatewayLink();
 
